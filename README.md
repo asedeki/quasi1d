@@ -1,4 +1,4 @@
 # quasi1d
 contiendra les repertoires :
-1- Interaction.
-2- Seebeck.
+1- flow.
+2- seebeck.

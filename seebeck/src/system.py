@@ -82,7 +82,9 @@ class System():
                 self.set_g(self.g[i][Ti], array, GT)
 
     def set_g(self, g, array, g_T):
-
+        """
+        Fonction utilisé dans set_interaction
+        """
         N = self.N
         for i in range(N):
             for j in range(N):
