@@ -62,7 +62,7 @@ class System():
         g_1, g_2 ET g_3 a partir du fichier g_file.
         """
 
-        dirInd = "../../data/inddata"  # My laptop
+        dirInd = "/Users/asedeki/Drive/environement/Quasi1D/quasi1d/data/inddata"  # My laptop
         N = self.N
         array = np.load(f"{dirInd}/array_index_n{N}.npy")
 
