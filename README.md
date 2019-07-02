@@ -1,2 +1,4 @@
 # quasi1d
-rien de spetial
+contiendra les repertoires :
+1- Interaction.
+2- Seebeck.
