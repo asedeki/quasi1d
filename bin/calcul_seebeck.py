@@ -13,6 +13,7 @@ sys.path.append("..")
 import myoptik
 from myoptik import scan
 from seebeck.src.system import System
+from seebeck.src.seebeck_c import Seebeck
 
 
 def read_g_file(fileg="g.dat"):
@@ -42,7 +43,38 @@ def read_g_file(fileg="g.dat"):
 
 
 def run():
-    print(read_g_file())
+    Ts = _O.temperatures
+    output = _O.output
+    energies = _O.energies
+    parametres, g3 = read_g_file()
+    if Ts is None:
+        Temps = np.array(list(g3.keys()), dtype=np.double)
+        Temps = Temps[Temps >= 1]
+    else:
+        Temps = Ts
+    s = Seebeck(parametres=parametres, g3=g3,
+                temperatures=Temps, energies=energies,
+                integration=_O.integration)
+    if _O.seebeck:
+        Qa = 0.00077  # fit article Myriam
+        seebeck_coef = []
+        for t in Temps:
+            try:
+                s_cof, err = s.coefficient_seebeck(t)
+                seebeck_coef.append((t, (s_cof+Qa)*t, err))
+                #seebeck_coef.append((t,s_cof, err))
+            except Exception as e:
+                print(e)
+        s.save_csv(output+"_Seebeck", keys=["Temperature",
+                                            "CoefficientSeebeck", "Erreur"], data=seebeck_coef)
+    if Ts is not None:
+        TT = []
+        for t in Ts:
+            m = np.min(np.abs(Temps-t))
+            TT.append(Temps[np.abs(Temps-t) == m][0])
+        Temps = TT
+    s.set_temps_diffusion(temperatures=Temps)
+    s.save_csv(output+"_diffusion")
 
 
 def run_dir(d):
