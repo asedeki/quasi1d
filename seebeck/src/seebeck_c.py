@@ -1,6 +1,7 @@
 import numpy as np
 from seebeck.src.system import System
 from seebeck.src.matricediffusion.matricediffusion import MatriceDiffusion as MDf
+from seebeck.src.matricediffusion.matricediffusion import MatriceDiffusionIntegPy as MDi
 import math
 
 
@@ -9,7 +10,7 @@ class Seebeck:
         self.temperatures = temperatures
         self.energies = energies
         if integration:
-            print("a venir")
+            self.MatriceDiffusion = MDi()
         else:
             self.MatriceDiffusion = MDf()
         self.parametres = parametres

@@ -17,3 +17,10 @@ cdef class MatriceDiffusion:
     cdef double[:] get_row_collision_matrix(self,
                     double[:,:,::1] mu_1, double[:,:,::1] mu_2, long k1)
     cdef double get_ek_deriv(self, double e, double eta, double tp)
+
+cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
+    cpdef double get_sigma_Mu1(self, double, double, double)
+    cpdef int get_Mu1(self, double[:,:,::1])
+    cpdef double get_sigma_Mu2(self, double, double, double)
+    cpdef int get_Mu2(self, double[:,:,::1])
+    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) 

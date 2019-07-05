@@ -9,6 +9,7 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc cimport math
+from scipy.integrate import dblquad, quad, tplquad
 
 cimport seebeck.src.integration.integration as cbi
 import seebeck.src.integration.integration as cbi
@@ -59,19 +60,19 @@ cdef class MatriceDiffusion:
             double v1, v2
             double s_v
             double val
-
+            double kperp_vec[4]
         for i in range(N):
             v1 = self.eperp(i)
             for j in range(i,N):
-                v2= self.eperp(j)
+                v2 = self.eperp(j)
                 for k in range(N):
                     s_v = v1 + v2 + self.eperp(k)\
-                              + self.eperp(i+j-k)
+                              + self.eperp(i+j-k) 
                     val =  self.sigma(s_v)
                     if abs(val) <= 1e-20:
                         val = 0.0
                     mu_2[i][j][k] = val
-                    mu_2[j][i][k] = mu_2[i][j][k]
+                    mu_2[j][i][k] = val
 
         for i in range(N):
             for j in range(N):
@@ -152,5 +153,92 @@ cdef class MatriceDiffusion:
             Na += 1.0/ve
 
         return Va**2*Na
+
+cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
+    def __init__(self, arg={}, g3 = None):
+        super().__init__(arg, g3)
+    
+    cpdef double get_sigma_Mu1(self, double x, double y, double k1):
+        cdef:
+            double sum_e
+            double k_p[4]
+            int nk = 4
+        k_p = [k1, x+y-k1, x, y]
+        sum_e = cbi.sum_eperp(nk, k_p, self.arg.tp, self.arg.tp2)        
+        return self.sigma(sum_e)
+
+    cpdef double get_sigma_Mu2(self, double x, double k1, double k2):
+        cdef:
+            double sum_e
+            double k_p[4]
+            int nk = 4
+        k_p = [k1, k2, x, k1+k2-x]
+        sum_e = cbi.sum_eperp(nk, k_p, self.arg.tp, self.arg.tp2) 
+        
+        return self.sigma(sum_e)
+
+    cpdef int get_Mu1(self, double[:,:,::1] mu_1):
+        cdef:
+            unsigned int k1, k3, k4
+            unsigned int N = self.arg.Np
+            double delta = self.arg.v
+            double val, x1, x2, y1, y2
+            double kk1
+        for k1 in range(N):
+            kk1 = k1*delta
+            for k3 in range(N):
+                x1 = (k3-0.0)*delta
+                x2 = (k3+1.0)*delta
+                for k4 in range(k3, N):
+                    y1 = (k4 - 0.5)*delta
+                    y2 = (k4 + 0.5)*delta
+                    val = dblquad( self.get_sigma_Mu1, x1, x2, y1, y2,
+                        args=(kk1, ), epsrel=1.0e-06)[0]
+                    mu_1[k1][k3][k4] = val/delta**2
+            
+        for k1 in range(N):
+            for k3 in range(N):
+                for k4 in range(0, k3):
+                    mu_1[k1][k3][k4] = mu_1[k1][k4][k3]
+
+        return 0
+    
+    cpdef int get_Mu2(self, double[:,:,::1] mu_2):
+        cdef:
+            unsigned int k1, k2, k3
+            unsigned int N = self.arg.Np
+            double delta = self.arg.v
+            double val, x1, x2
+            double kk1, kk2
+        for k1 in range(N):
+            kk1 = k1*delta
+            for k2 in range(k1,N):
+                kk2 = k2*delta
+                for k3 in range(N):
+                    x1 = (k3 - 0.5)*delta
+                    x2 = (k3 + 0.5)*delta
+                    val = quad( self.get_sigma_Mu2, x1, x2,
+                        args=(kk1, kk2, ), epsrel=1.0e-06)[0]
+                    mu_2[k1][k2][k3] = val/delta
+            
+        for k1 in range(N):
+            for k2 in range(0,k1):
+                for k3 in range(N):
+                    mu_2[k1][k2][k3] = mu_2[k2][k1][k3]
+
+        return 0
+    
+    
+
+    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) :
+        cdef:
+            int value
+            str typ = "h"
+            unsigned int N = self.arg.Np
+            unsigned i, j, k
+            double[:,:,:,::1] Mu
+        
+        value = self.get_Mu1(mu_1)
+        value = self.get_Mu2(mu_2)
 
     

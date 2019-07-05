@@ -62,19 +62,23 @@ def run():
             try:
                 s_cof, err = s.coefficient_seebeck(t)
                 seebeck_coef.append((t, (s_cof+Qa)*t, err))
+                print(f"{t}\t{(s_cof+Qa)*t}")
                 #seebeck_coef.append((t,s_cof, err))
             except Exception as e:
                 print(e)
         s.save_csv(output+"_Seebeck", keys=["Temperature",
                                             "CoefficientSeebeck", "Erreur"], data=seebeck_coef)
-    if Ts is not None:
-        TT = []
-        for t in Ts:
-            m = np.min(np.abs(Temps-t))
-            TT.append(Temps[np.abs(Temps-t) == m][0])
-        Temps = TT
-    s.set_temps_diffusion(temperatures=Temps)
-    s.save_csv(output+"_diffusion")
+
+    if _O.temps_diffusion:
+        if Ts is not None:
+            TT = []
+            for t in Ts:
+                m = np.min(np.abs(Temps-t))
+                TT.append(Temps[np.abs(Temps-t) == m][0])
+            Temps = TT
+
+        s.set_temps_diffusion(temperatures=Temps)
+        s.save_csv(output+"_diffusion")
 
 
 def run_dir(d):

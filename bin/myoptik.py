@@ -102,6 +102,9 @@ def opt():
     parser.add_option("-s", "--seebeck", action="store_true",
                       dest="seebeck", help="calcul Coeff Seebeck")
 
+    parser.add_option("-d", "--tempsdiffusion", action="store_true",
+                      dest="temps_diffusion", help="calcul Coeff Seebeck")
+
     (_val, args) = parser.parse_args()
     return _val
 
