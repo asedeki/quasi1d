@@ -2,8 +2,7 @@
 import numpy as np
 cimport numpy as np
 #ctypedef struct param
-from Seebeck.src.utils.system.structure cimport param
-
+from  seebeck.src.structure cimport param
 
 cdef class MatriceDiffusion:
 
@@ -23,4 +22,9 @@ cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
     cpdef int get_Mu1(self, double[:,:,::1])
     cpdef double get_sigma_Mu2(self, double, double, double)
     cpdef int get_Mu2(self, double[:,:,::1])
-    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) 
+    cpdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) 
+
+cdef class MatriceDiffusionInteg(MatriceDiffusion):
+    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2)
+
+    

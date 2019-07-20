@@ -76,7 +76,6 @@ def run():
                 m = np.min(np.abs(Temps-t))
                 TT.append(Temps[np.abs(Temps-t) == m][0])
             Temps = TT
-
         s.set_temps_diffusion(temperatures=Temps)
         s.save_csv(output+"_diffusion")
 

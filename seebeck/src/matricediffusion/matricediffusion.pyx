@@ -187,13 +187,13 @@ cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
         for k1 in range(N):
             kk1 = k1*delta
             for k3 in range(N):
-                x1 = (k3-0.0)*delta
-                x2 = (k3+1.0)*delta
+                x1 = (k3 - 0.5)*delta
+                x2 = (k3 + 0.5)*delta
                 for k4 in range(k3, N):
                     y1 = (k4 - 0.5)*delta
                     y2 = (k4 + 0.5)*delta
                     val = dblquad( self.get_sigma_Mu1, x1, x2, y1, y2,
-                        args=(kk1, ), epsrel=1.0e-06)[0]
+                        args=(kk1, ), epsrel=1.0e-04)[0]
                     mu_1[k1][k3][k4] = val/delta**2
             
         for k1 in range(N):
@@ -218,7 +218,7 @@ cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
                     x1 = (k3 - 0.5)*delta
                     x2 = (k3 + 0.5)*delta
                     val = quad( self.get_sigma_Mu2, x1, x2,
-                        args=(kk1, kk2, ), epsrel=1.0e-06)[0]
+                        args=(kk1, kk2, ), epsrel=1.0e-04)[0]
                     mu_2[k1][k2][k3] = val/delta
             
         for k1 in range(N):
@@ -230,15 +230,18 @@ cdef class MatriceDiffusionIntegPy(MatriceDiffusion):
     
     
 
-    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) :
-        cdef:
-            int value
-            str typ = "h"
-            unsigned int N = self.arg.Np
-            unsigned i, j, k
-            double[:,:,:,::1] Mu
+    cpdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) :
         
         value = self.get_Mu1(mu_1)
         value = self.get_Mu2(mu_2)
 
+cdef class MatriceDiffusionInteg(MatriceDiffusion):
     
+    def __init__(self, arg={}, g3 = None):
+        super().__init__(arg, g3)
+    
+    cdef void get_sigma(self, double[:,:,::1] mu_1, double[:,:,::1] mu_2) :
+        cdef:
+            str typ = "h"
+        
+        cbi.get_mu_matrix(self.arg, mu_1, mu_2, typ)
