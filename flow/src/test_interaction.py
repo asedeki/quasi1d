@@ -8,7 +8,7 @@ class bulle:
         self.IC = np.ones((N, N, N), float)*1.0
 
 
-N = 2
+N = 32
 g = Interaction(N)
 g.initialisation(0.6, 0.6, 0.6)
 print(g.g1)

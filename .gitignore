@@ -9,3 +9,6 @@ g.dat
 tmp
 tata
 Makefile
+*.npz
+*.c
+test_*.py

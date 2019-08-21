@@ -1,6 +1,8 @@
 import numpy as np
 from math import pi
 
+# todo reflechir a wrap(), %N ne donne que des valeurs positives
+
 
 class Interaction:
     def __init__(self, N_patche):
@@ -18,6 +20,14 @@ class Interaction:
                     self.g1[i] = g1
                     self.g2[i] = g2
                     self.g3[i] = g3
+
+    def inipack(self):
+        Ng = self.N_patche**3
+        y = np.zeros(3*Ng)
+        y[:Ng] = self.g1.reshape((Ng,))
+        y[Ng:2*Ng] = self.g2.reshape((Ng,))
+        y[2*Ng:3*Ng] = self.g3.reshape((Ng,))
+        return y
 
     def pack(self):
         Ng = self.N_patche**3
