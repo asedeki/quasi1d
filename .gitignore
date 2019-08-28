@@ -12,3 +12,7 @@ Makefile
 *.npz
 *.c
 test_*.py
+lib/
+tobeluga.py
+getbeluga.py
+*.tgz
