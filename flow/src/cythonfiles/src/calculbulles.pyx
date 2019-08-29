@@ -182,15 +182,15 @@ cpdef void valeursbulles(double x, double T, pquasi1d param,
 
     #for qp in prange(-N2, N2,nogil=True):
 
-    #with nogil, parallel(num_threads=2):
-    #    for k1 in prange(Np, schedule="dynamic"):        
-    for k1 in range(Np):
-        IPsusc[k1,0] = vbulle(&derivsusc, &param1, float(k1), float(k1), 0.0, +1,T)
-        IPsusc[k1,1] = vbulle(&derivsusc, &param1, float(k1), float(k1), float(N2), +1,T)
-        for kp in range(Np): 
-            for qp in range(N2+1):
-                    IP[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), +1,T)
-                    IC[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), -1,T)
+    with nogil, parallel():
+        for k1 in prange(Np):#, schedule="dynamic"):        
+    #for k1 in range(Np):
+            IPsusc[k1,0] = vbulle(&derivsusc, &param1, float(k1), float(k1), 0.0, +1,T)
+            IPsusc[k1,1] = vbulle(&derivsusc, &param1, float(k1), float(k1), float(N2), +1,T)
+            for kp in range(Np): 
+                for qp in range(N2+1):
+                        IP[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), +1,T)
+                        IC[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), -1,T)
     for k1 in range(Np):
         for kp in range(Np):
             for qp in range(N2+1,Np):

@@ -3,7 +3,7 @@ from math import pi
 import cinteraction as cint
 import sys
 import concurrent.futures as concfut
-
+from numba import jit
 
 # todo reflechir a wrap(), %N ne donne que des valeurs positives
 
@@ -17,13 +17,6 @@ class Interaction:
 
     def initialisation(self, g1, g2, g3, g1_perp=0, g2_perp=0, g3_perp=0):
         Np = self.Np
-        # for k1 in range(-N2, N2):
-        #     for k2 in range(-N2, N2):
-        #         for k3 in range(-N2, N2):
-        #             i = (k1, k2, k3)
-        #             self.g1[i] = g1
-        #             self.g2[i] = g2
-        #             self.g3[i] = g3
         self.g1 = np.ones((Np, Np, Np), float) * g1
         self.g2 = np.ones((Np, Np, Np), float) * g2
         self.g3 = np.ones((Np, Np, Np), float) * g3
@@ -36,6 +29,7 @@ class Interaction:
         y[2*Ng:3*Ng] = self.g3.reshape((Ng,))
         return y
 
+    @jit
     def pack(self, dg1, dg2, dg3):
         Ng = self.Np**3
         y = np.zeros(3*Ng)
@@ -44,6 +38,7 @@ class Interaction:
         y[2*Ng:3*Ng] = dg3.reshape((Ng,))
         return y
 
+    @jit
     def unpack(self, y):
         Ng = self.Np**3
         self.g1 = y[:Ng].reshape((self.Np, self.Np, self.Np))
@@ -52,7 +47,7 @@ class Interaction:
         self.g3 = y[2*Ng:3 *
                     Ng].reshape((self.Np, self.Np, self.Np))
 
-    def equations_rg_seq(self, bulle):
+    def equations_rg_py(self, bulle):
         Np = self.Np
         dg1 = np.zeros((Np, Np, Np), float)
         dg2 = np.zeros((Np, Np, Np), float)
@@ -113,9 +108,6 @@ class Interaction:
         cint.equations_rg(Np, self.g1, self.g2,
                           self.g3, bulle.IP, bulle.IC,
                           dg1, dg2, dg3)
-        #print("dg=", self.dg2[0, 0, Np//2])
-        # sys.exit(1)
-        #self.dg = self.pack()
         return self.pack(dg1, dg2, dg3)
 
     def rg_rows(self, vk1):
@@ -151,8 +143,8 @@ class Interaction:
         kvec = np.arange(Np)
         # for k1 in kvec:
         #     self.rg_row(k1)
-        with concfut.ThreadPoolExecutor(max_workers=4) as executor:
-            s = np.array_split(kvec, 4)
+        with concfut.ThreadPoolExecutor(max_workers=8) as executor:
+            s = np.array_split(kvec, 8)
             jobs = [executor.submit(self.rg_rows, kk) for kk in s]
 
         for gg in jobs:

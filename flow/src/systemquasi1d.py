@@ -1,9 +1,10 @@
-from scipy.integrate import odeint, solve_ivp
+from scipy.integrate import odeint, solve_ivp, ode
 from interaction import Interaction
 from bulles import Bulles
 import sys
 import warnings
 import numpy as np
+from numba import jit
 
 
 class System:
@@ -39,6 +40,7 @@ class System:
         return dy
 
     def evolutiontemperature(self, T):
+        @jit(nogil=True)
         def rg(l, y):
             # input(type(y))
             self.unpack(y)
@@ -62,6 +64,28 @@ class System:
                 # print(sol)
         return sol.success
 
+    def evolution_temperature_ode(self, T):
+        def rg(l, y, arg):
+            self.unpack(y)
+            dy = self.derivee(l, T)
+            return dy
+        lf = 100.0
+        y0 = self.inipack()
+        Integ = ode(rg).set_integrator(
+            'dop853', rtol=1e-3)  # 'dop853' “dopri5” "lsoda"
+        Integ.set_f_params(9)
+        Integ.set_initial_value(y0, 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            Integ.integrate(lf)
+            if (Integ.successful()):
+                self.unpack(Integ.y)
+            else:
+                pass
+                # print(sol.message)
+                # print(sol)
+        return Integ.successful()
+
     def evolutionl(self, li, lf):
         def rg(l, y):
             self.unpack(y)
@@ -78,11 +102,3 @@ class System:
             else:
                 # print(sol.message)
                 return False
-        # with warnings.catch_warnings():
-        #     y = odeint(rg, y0, l, full_output=1)
-        #     if y[1]["message"] == "Integration successful.":
-        #         self.unpack(y[0][1])
-        #         return True
-        #     else:
-        #         print(f'erreur dans odeint: {y[1]["message"]}')
-        #         return False
