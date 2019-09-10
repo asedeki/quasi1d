@@ -1,6 +1,8 @@
 import numpy as np
 import calculbulles as cb
 from math import tanh, exp
+import pstats
+import cProfile
 
 
 class Bulles:
@@ -20,10 +22,8 @@ class Bulles:
         # print(f"bulle faite pout {l}")
 
 
-if __name__ == "__main__":
-    import time
-    t1 = time.time()
-    r = {"tp": 200, "tp2": 20, "Ef": 3000, "Np": 32, "g1": 0.2}
+def test():
+    r = {"tp": 200, "tp2": 20, "Ef": 3000, "Np": 64, "g1": 0.2}
     bulle = Bulles(r)
 
     T = 1
@@ -32,14 +32,28 @@ if __name__ == "__main__":
     EF = r['Ef']*exp(-l)
     n = r["Np"]//2
     bulle.calculer(T, l)
+    return bulle
+
+
+if __name__ == "__main__":
+    import time
+    t1 = time.time()
+    cProfile.runctx("test()", globals(), locals(), "Profile.prof")
+
+    s = pstats.Stats("Profile.prof")
+    s.strip_dirs().sort_stats("time").print_stats()
+    #bulle = test()
+    # profile.run(
+    #     'cb.valeursbulles(l, T, bulle.param, bulle.IC, bulle.IP, bulle.IPsusc)')
     # np.savez("test", C=bulle.IC, P=bulle.IP, P2=bulle.IPsusc)
     #s = np.load("test.npz")
     #IC = s["C"]
-    II = bulle.IP
-    for i in range(-n, n):
-        print(f"{i}\t{II[i, 0, 0]}")
-    print(f"sum = {np.sum(II[:, 0, 0])}")
-    print(f"temps exec : {time.time()-t1}")
+    # II = bulle.IP
+    # n = bulle.IP.shape[0]
+    # for i in range(-n, n):
+    #     print(f"{i}\t{II[i, 0, 0]}")
+    # print(f"sum = {np.sum(II[:, 0, 0])}")
+    # print(f"temps exec : {time.time()-t1}")
     #print(f" IC0={bulle.IC[:, 0, 0]}")
     # Np = r['Np']
     # for i in range(-n, n):

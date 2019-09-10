@@ -80,10 +80,7 @@ class System:
             Integ.integrate(lf)
             if (Integ.successful()):
                 self.unpack(Integ.y)
-            else:
-                pass
-                # print(sol.message)
-                # print(sol)
+
         return Integ.successful()
 
     def evolutionl(self, li, lf):

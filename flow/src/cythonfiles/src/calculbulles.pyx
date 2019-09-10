@@ -5,6 +5,10 @@
 #distutils: extra_compile_args = -fopenmp -O2
 #distutils: extra_link_args = -fopenmp
 
+## cython : profile = True
+# cython: linetrace=True
+##distutils: define_macros=CYTHON_TRACE_NOGIL=1
+
 
 from libc.math cimport M_PI, tanh, exp, cosh, fabs, cos
 from cython_gsl cimport *
@@ -116,7 +120,7 @@ cdef double vbulle(integrand derivee, pquasi1d *pq1d, double kp, double kf, doub
         #The higher-order rules give better accuracy for smooth 
         #functions, while lower-order rules save time when the function contains 
         #local difficulties, such as discontinuities.
-        double epsabs = 0.0, epsrel=1e-4
+        double epsabs = 0.0, epsrel=1e-6
         #gsl_integration_workspace *w
         gsl_integration_cquad_workspace *w 
     w = gsl_integration_cquad_workspace_alloc (100)
@@ -189,8 +193,8 @@ cpdef void valeursbulles(double x, double T, pquasi1d param,
             IPsusc[k1,1] = vbulle(&derivsusc, &param1, float(k1), float(k1), float(N2), +1,T)
             for kp in range(Np): 
                 for qp in range(N2+1):
-                        IP[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), +1,T)
-                        IC[k1, kp, qp] = vbulle(&deriv, &param1, float(kp), float(k1), float(qp), -1,T)
+                        IP[k1, kp, qp] = vbulle(&deriv, &param1, float(k1), float(kp), float(qp), +1,T)
+                        IC[k1, kp, qp] = vbulle(&deriv, &param1, float(k1), float(kp), float(qp), -1,T)
     for k1 in range(Np):
         for kp in range(Np):
             for qp in range(N2+1,Np):
