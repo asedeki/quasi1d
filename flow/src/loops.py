@@ -1,30 +1,31 @@
 import numpy as np
 import calculbulles as cb
-from math import tanh, exp
 import pstats
 import cProfile
 
 
-class Bulles:
+class Loops:
     def __init__(self, parametres):
         self.param = parametres
 
     def resset(self):
         Np = self.param["Np"]
-        self.IC = np.zeros((Np, Np, Np), float)
-        self.IP = np.zeros((Np, Np, Np), float)
-        self.IPsusc = np.zeros((Np, 2), float)
+        self.Cooper = np.zeros((Np, Np, Np), float)
+        self.Peierls = np.zeros((Np, Np, Np), float)
+        self.Peierls_susc = np.zeros((Np, 2), float)
 
     def calculer(self, T, l):
         # print("in bubble")
         self.resset()
-        cb.valeursbulles(l, T, self.param, self.IC, self.IP, self.IPsusc)
+        cb.valeursbulles(l, T, self.param, self.Cooper,
+                         self.Peierls, self.Peierls_susc)
         # print(f"bulle faite pout {l}")
 
 
 def test():
+    from math import exp
     r = {"tp": 200, "tp2": 20, "Ef": 3000, "Np": 64, "g1": 0.2}
-    bulle = Bulles(r)
+    bulle = Loops(r)
 
     T = 1
     l = 0.0
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     s.strip_dirs().sort_stats("time").print_stats()
     #bulle = test()
     # profile.run(
-    #     'cb.valeursbulles(l, T, bulle.param, bulle.IC, bulle.IP, bulle.IPsusc)')
+    #     'cb.valeursLoops(l, T, bulle.param, bulle.IC, bulle.IP, bulle.IPsusc)')
     # np.savez("test", C=bulle.IC, P=bulle.IP, P2=bulle.IPsusc)
     #s = np.load("test.npz")
     #IC = s["C"]

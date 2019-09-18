@@ -19,3 +19,5 @@ lib/
 tobeluga.py
 getbeluga.py
 *.tgz
+*.prof
+*~
